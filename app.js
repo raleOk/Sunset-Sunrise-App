@@ -89,9 +89,7 @@ const Controller = ((Model, View) => {
 
   currentTime.innerHTML = `${formattedCurrentTime.hrFormat}:${formattedCurrentTime.minFormat}`;
 
-  // I want this to just be an obj with values, that I get immediately after the page loads
-
-  const timeObj = () => {
+  const sunsetFunc = () => {
     Model.getData()
       .then((data) => {
         hr = data.sunset.getHours();
@@ -115,28 +113,26 @@ const Controller = ((Model, View) => {
         getRemainingTime(timeValues);
       });
   };
-  timeObj();
+  sunsetFunc();
 
+  // need this to run every 1 sec, setInterval works, but the func gets invoked inside of a .then()
   const getRemainingTime = (obj) => {
-    const t = obj.mSec - Model.currentTimeValues.mSec;
+    const timeDiff = obj.mSec - Model.currentTimeValues.mSec;
 
     // values in ms
     const oneHour = 60 * 60 * 1000;
     const oneMinute = 60 * 1000;
 
     // calculate needed values
-    const hoursLeft = Math.floor(t / oneHour);
-    console.log(hoursLeft);
-    const minutesLeft = Math.floor((t % oneHour) / oneMinute);
-    console.log(minutesLeft);
-    const secondsLeft = Math.floor((t % oneMinute) / 1000);
-    console.log(secondsLeft);
+    const hoursLeft = Math.floor(timeDiff / oneHour);
+    const minutesLeft = Math.floor((timeDiff % oneHour) / oneMinute);
+    const secondsLeft = Math.floor((timeDiff % oneMinute) / 1000);
 
     const countdownValues = [hoursLeft, minutesLeft, secondsLeft];
     sunsetItems.forEach((item, index) => {
       item.innerHTML = countdownValues[index];
     });
-    if (t < 0) {
+    if (timeDiff < 0) {
       sunsetCountdownDiv.innerHTML = `<h1>The sun has set!</h1>`;
     }
   };
