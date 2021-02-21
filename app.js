@@ -7,9 +7,14 @@ const Model = (() => {
       const onSuccess = (position) => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
+
         sunset = getSunset(lat, lng);
         sunrise = getSunrise(lat, lng);
-        data = { sunset, sunrise };
+
+        hr = sunset.getHours();
+        min = sunset.getMinutes();
+        mSec = sunset.getTime();
+        const data = { hr, min, mSec };
         resolve(data);
       };
 
@@ -79,45 +84,35 @@ const Controller = ((Model, View) => {
   const sunsetItems = document.querySelectorAll(".sunsetCountdown-format h4");
   const sunsetCountdownDiv = document.getElementById("sunsetCountdown");
   const sunsetTimeToday = document.getElementById("sunsetTimeToday");
-  const currentTime = document.getElementById("currentTime");
-  const btn = document.getElementById("btn");
-
-  const formattedCurrentTime = Model.timeFormat(
-    Model.currentTimeValues.hr,
-    Model.currentTimeValues.min
-  );
-
-  currentTime.innerHTML = `${formattedCurrentTime.hrFormat}:${formattedCurrentTime.minFormat}`;
 
   const sunsetFunc = () => {
     Model.getData()
       .then((data) => {
-        hr = data.sunset.getHours();
-        min = data.sunset.getMinutes();
-        mSec = data.sunset.getTime();
-        const timeValues = { hr, min, mSec };
-
         const formattedCurrentTimeValues = ({
           hrFormat,
           minFormat,
-        } = Model.timeFormat(hr, min));
+        } = Model.timeFormat(data.hr, data.min));
         View.displayTime(
           sunsetTimeToday,
           formattedCurrentTimeValues.hrFormat,
           formattedCurrentTimeValues.minFormat
         );
-        return timeValues;
+        return data;
       })
-      .then((timeValues) => {
-        //the func that calculates the diff in time
-        getRemainingTime(timeValues);
+      .then((data) => {
+        cloneObj(data);
       });
   };
   sunsetFunc();
 
-  // need this to run every 1 sec, setInterval works, but the func gets invoked inside of a .then()
-  const getRemainingTime = (obj) => {
-    const timeDiff = obj.mSec - Model.currentTimeValues.mSec;
+  let clone;
+  const cloneObj = (obj) => {
+    clone = { ...obj };
+  };
+
+  const getRemainingTime = () => {
+    const currentMs = new Date().getTime();
+    const timeDiff = clone.mSec - currentMs;
 
     // values in ms
     const oneHour = 60 * 60 * 1000;
@@ -133,7 +128,10 @@ const Controller = ((Model, View) => {
       item.innerHTML = countdownValues[index];
     });
     if (timeDiff < 0) {
+      clearInterval(countdown);
       sunsetCountdownDiv.innerHTML = `<h1>The sun has set!</h1>`;
     }
   };
+
+  const countdown = setInterval(getRemainingTime, 1000);
 })(Model, View);
