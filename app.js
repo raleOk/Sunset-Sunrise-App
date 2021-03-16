@@ -42,26 +42,16 @@ const Model = (() => {
   const currentTimeValues = ({ hr, min, mSec } = currentTime());
 
   // js automatically displays 01, 02, 03...numbers like 1,2,3...
-  // reformat
-  const timeFormat = (hr, min) => {
-    let hrFormat;
-    let minFormat;
-    if (hr < 10) {
-      hr.toString();
-      hrFormat = "0" + hr;
-    } else {
-      hrFormat = hr;
-    }
-    if (min < 10) {
-      min.toString();
-      minFormat = "0" + min;
-    } else {
-      minFormat = min;
-    }
-    return {
-      hrFormat,
-      minFormat,
-    };
+  const timeFormat = (...time) => {
+    let timeArr = [];
+    time.forEach((element) => {
+      if (element < 10) {
+        timeArr.push("0" + element);
+      } else {
+        timeArr.push(element);
+      }
+    });
+    return timeArr;
   };
 
   return {
@@ -88,14 +78,14 @@ const Controller = ((Model, View) => {
   const sunsetFunc = () => {
     Model.getData()
       .then((data) => {
-        const formattedCurrentTimeValues = ({
-          hrFormat,
-          minFormat,
-        } = Model.timeFormat(data.hr, data.min));
+        const formattedSunset = ([hrFormat, minFormat] = Model.timeFormat(
+          data.hr,
+          data.min
+        ));
         View.displayTime(
           sunsetTimeToday,
-          formattedCurrentTimeValues.hrFormat,
-          formattedCurrentTimeValues.minFormat
+          formattedSunset[0],
+          formattedSunset[1]
         );
         return data;
       })
@@ -114,6 +104,11 @@ const Controller = ((Model, View) => {
     const currentMs = new Date().getTime();
     const timeDiff = clone.mSec - currentMs;
 
+    if (timeDiff < 0) {
+      clearInterval(countdown);
+      sunsetCountdownDiv.innerHTML = `<h1>The sun has set!</h1>`;
+    }
+
     // values in ms
     const oneHour = 60 * 60 * 1000;
     const oneMinute = 60 * 1000;
@@ -124,13 +119,19 @@ const Controller = ((Model, View) => {
     const secondsLeft = Math.floor((timeDiff % oneMinute) / 1000);
 
     const countdownValues = [hoursLeft, minutesLeft, secondsLeft];
+
+    const formatValue = (value) => {
+      if (value < 10) {
+        format = "0" + value;
+        return format;
+      } else {
+        return value;
+      }
+    };
+
     sunsetItems.forEach((item, index) => {
-      item.innerHTML = countdownValues[index];
+      item.innerHTML = formatValue(countdownValues[index]);
     });
-    if (timeDiff < 0) {
-      clearInterval(countdown);
-      sunsetCountdownDiv.innerHTML = `<h1>The sun has set!</h1>`;
-    }
   };
 
   const countdown = setInterval(getRemainingTime, 1000);
