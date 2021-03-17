@@ -1,8 +1,7 @@
-const moment = require("moment");
 const { getSunrise, getSunset } = require("sunrise-sunset-js");
 
 const Model = (() => {
-  const getData = () => {
+  const getSunsetData = () => {
     return new Promise((resolve, reject) => {
       const onSuccess = (position) => {
         const lat = position.coords.latitude;
@@ -41,23 +40,20 @@ const Model = (() => {
 
   const currentTimeValues = ({ hr, min, mSec } = currentTime());
 
-  // js automatically displays 01, 02, 03...numbers like 1,2,3...
-  const timeFormat = (...time) => {
-    let timeArr = [];
+  const formatTime = (...time) => {
+    let arr = [];
     time.forEach((element) => {
-      if (element < 10) {
-        timeArr.push("0" + element);
-      } else {
-        timeArr.push(element);
-      }
+      element < 10
+        ? (arr = [...arr, `0${element}`])
+        : (arr = [...arr, element]);
     });
-    return timeArr;
+    return arr;
   };
 
   return {
-    getData,
+    getSunsetData,
     currentTimeValues,
-    timeFormat,
+    formatTime,
   };
 })();
 const View = (() => {
@@ -76,9 +72,9 @@ const Controller = ((Model, View) => {
   const sunsetTimeToday = document.getElementById("sunsetTimeToday");
 
   const sunsetFunc = () => {
-    Model.getData()
+    Model.getSunsetData()
       .then((data) => {
-        const formattedSunset = ([hrFormat, minFormat] = Model.timeFormat(
+        const formattedSunset = ([hrFormat, minFormat] = Model.formatTime(
           data.hr,
           data.min
         ));
@@ -121,12 +117,7 @@ const Controller = ((Model, View) => {
     const countdownValues = [hoursLeft, minutesLeft, secondsLeft];
 
     const formatValue = (value) => {
-      if (value < 10) {
-        format = "0" + value;
-        return format;
-      } else {
-        return value;
-      }
+      return value < 10 ? `0${value}` : value;
     };
 
     sunsetItems.forEach((item, index) => {
