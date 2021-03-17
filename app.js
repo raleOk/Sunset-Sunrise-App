@@ -26,6 +26,17 @@ const Model = (() => {
     });
   };
 
+  const calculateTime = (timeDiff) => {
+    const oneHour = 60 * 60 * 1000;
+    const oneMinute = 60 * 1000;
+
+    const hoursLeft = Math.floor(timeDiff / oneHour);
+    const minutesLeft = Math.floor((timeDiff % oneHour) / oneMinute);
+    const secondsLeft = Math.floor((timeDiff % oneMinute) / 1000);
+
+    return [hoursLeft, minutesLeft, secondsLeft];
+  };
+
   const currentTime = () => {
     date = new Date();
     hr = date.getHours();
@@ -50,10 +61,16 @@ const Model = (() => {
     return arr;
   };
 
+  const formatNum = (num) => {
+    return num < 10 ? `0${num}` : num;
+  };
+
   return {
     getSunsetData,
-    currentTimeValues,
     formatTime,
+    formatNum,
+    calculateTime,
+    currentTimeValues,
   };
 })();
 const View = (() => {
@@ -63,7 +80,13 @@ const View = (() => {
     el.appendChild(time);
   };
 
-  return { displayTime };
+  const displayCountdown = (nodeList, arr) => {
+    nodeList.forEach((item, index) => {
+      item.innerHTML = Model.formatNum(arr[index]);
+    });
+  };
+
+  return { displayCountdown, displayTime };
 })();
 
 const Controller = ((Model, View) => {
@@ -105,24 +128,13 @@ const Controller = ((Model, View) => {
       sunsetCountdownDiv.innerHTML = `<h1>The sun has set!</h1>`;
     }
 
-    // values in ms
-    const oneHour = 60 * 60 * 1000;
-    const oneMinute = 60 * 1000;
+    const countdownValues = ([
+      hoursLeft,
+      minutesLeft,
+      secondsLeft,
+    ] = Model.calculateTime(timeDiff));
 
-    // calculate needed values
-    const hoursLeft = Math.floor(timeDiff / oneHour);
-    const minutesLeft = Math.floor((timeDiff % oneHour) / oneMinute);
-    const secondsLeft = Math.floor((timeDiff % oneMinute) / 1000);
-
-    const countdownValues = [hoursLeft, minutesLeft, secondsLeft];
-
-    const formatValue = (value) => {
-      return value < 10 ? `0${value}` : value;
-    };
-
-    sunsetItems.forEach((item, index) => {
-      item.innerHTML = formatValue(countdownValues[index]);
-    });
+    View.displayCountdown(sunsetItems, countdownValues);
   };
 
   const countdown = setInterval(getRemainingTime, 1000);
