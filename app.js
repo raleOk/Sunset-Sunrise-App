@@ -26,6 +26,8 @@ const Model = (() => {
     });
   };
 
+  const sunsetObj = {};
+
   const calculateTime = (timeDiff) => {
     const oneHour = 60 * 60 * 1000;
     const oneMinute = 60 * 1000;
@@ -42,6 +44,7 @@ const Model = (() => {
     hr = date.getHours();
     min = date.getMinutes();
     mSec = date.getTime();
+
     return {
       hr,
       min,
@@ -71,6 +74,7 @@ const Model = (() => {
     formatNum,
     calculateTime,
     currentTimeValues,
+    sunsetObj,
   };
 })();
 const View = (() => {
@@ -109,19 +113,14 @@ const Controller = ((Model, View) => {
         return data;
       })
       .then((data) => {
-        cloneObj(data);
+        Model.sunsetObj.mSec = data.mSec;
       });
   };
   sunsetFunc();
 
-  let clone;
-  const cloneObj = (obj) => {
-    clone = { ...obj };
-  };
-
   const getRemainingTime = () => {
     const currentMs = new Date().getTime();
-    const timeDiff = clone.mSec - currentMs;
+    const timeDiff = Model.sunsetObj.mSec - currentMs;
 
     if (timeDiff < 0) {
       clearInterval(countdown);
