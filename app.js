@@ -7,12 +7,13 @@ const Model = (() => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
 
-        sunset = getSunset(lat, lng);
-        sunrise = getSunrise(lat, lng);
+        const sunset = getSunset(lat, lng);
+        const sunrise = getSunrise(lat, lng);
 
-        hr = sunset.getHours();
-        min = sunset.getMinutes();
-        mSec = sunset.getTime();
+        const hr = sunset.getHours();
+        const min = sunset.getMinutes();
+        const mSec = sunset.getTime();
+
         const data = { hr, min, mSec };
         resolve(data);
       };
