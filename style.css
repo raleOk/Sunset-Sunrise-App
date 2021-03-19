@@ -1,0 +1,11 @@
+#sunsetCountdown {
+  margin: auto;
+  text-align: center;
+}
+
+.sunsetTime {
+  width: 5%;
+  border: 3px solid lightblue;
+  padding: 1px;
+  text-align: center;
+}
