@@ -39,21 +39,6 @@ const Model = (() => {
     return [hoursLeft, minutesLeft, secondsLeft];
   };
 
-  const currentTime = () => {
-    date = new Date();
-    hr = date.getHours();
-    min = date.getMinutes();
-    mSec = date.getTime();
-
-    return {
-      hr,
-      min,
-      mSec,
-    };
-  };
-
-  const currentTimeValues = ({ hr, min, mSec } = currentTime());
-
   const formatTime = (...time) => {
     let arr = [];
     time.forEach((element) => {
@@ -68,11 +53,25 @@ const Model = (() => {
     return num < 10 ? `0${num}` : num;
   };
 
+  const currentTime = () => {
+    const date = new Date();
+
+    const hr = date.getHours();
+    const min = date.getMinutes();
+    const ms = date.getTime();
+    const arr = formatTime(hr, min, ms);
+
+    return arr;
+  };
+
+  const currentTimeValues = ([hr, min, ms] = currentTime());
+
   return {
     getSunsetData,
     formatTime,
     formatNum,
     calculateTime,
+    currentTime,
     currentTimeValues,
     sunsetObj,
   };
@@ -97,6 +96,13 @@ const Controller = ((Model, View) => {
   const sunsetItems = document.querySelectorAll(".sunsetCountdown-format h4");
   const sunsetCountdownDiv = document.getElementById("sunsetCountdown");
   const sunsetTimeToday = document.getElementById("sunsetTimeToday");
+  const currentTime = document.getElementById("currentTime");
+
+  View.displayTime(
+    currentTime,
+    Model.currentTimeValues[0],
+    Model.currentTimeValues[1]
+  );
 
   const sunsetFunc = () => {
     Model.getSunsetData()
