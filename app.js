@@ -8,7 +8,6 @@ const Model = (() => {
         const lng = position.coords.longitude;
 
         const sunset = getSunset(lat, lng);
-        const sunrise = getSunrise(lat, lng);
 
         const hr = sunset.getHours();
         const min = sunset.getMinutes();
@@ -41,7 +40,7 @@ const Model = (() => {
   };
 
   const formatTime = (...time) => {
-    let arr = [];
+    const arr = [];
     time.forEach((element) => {
       element < 10
         ? (arr = [...arr, `0${element}`])
@@ -51,7 +50,7 @@ const Model = (() => {
   };
 
   const formatNum = (num) => {
-    return num < 10 ? `0${num}` : num;
+    num < 10 ? `0${num}` : num;
   };
 
   const currentTime = () => {
